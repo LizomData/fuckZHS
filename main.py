@@ -11,6 +11,7 @@ from logger import logger
 from ObjDict import ObjDict
 from utils import showImage, cookie_jar_to_list
 from utils import getConfigPath, getRealPath, versionCmp
+from myWebView import myWebView
 
 DEFAULT_CONFIG = {
     "username": "",
@@ -206,11 +207,17 @@ if save_cookies and os.path.exists(cookies_path):
 if not cookies_loaded:
     try:
         if qrlogin:
-            callback = partial(
-                showImage, show_in_terminal=show_in_terminal, ensure_unicode=ensure_unicode)
-            fucker.login(use_qr=True, qr_callback=callback)
+            view = myWebView()
+            view.display_html_url(
+                'https://passport.zhihuishu.com/login?service=https://onlineservice-api.zhihuishu.com/gateway/f/v1/login/gologin')
+
+            fucker.cookies = view.cookie_jar
+            # callback = partial(
+            #     showImage, show_in_terminal=show_in_terminal, ensure_unicode=ensure_unicode)
+            # fucker.login(use_qr=True, qr_callback=callback)
         else:
             fucker.login(username, password)
+
         print("Login Successful\n")
         if save_cookies:
             with open(cookies_path, 'w') as f:

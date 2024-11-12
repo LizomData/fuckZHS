@@ -46,6 +46,7 @@ def terminalShowImage_unicode(img):
     print(qr_str, end='')
     print(chars[0]*49)
 
+
 def terminalShowImage_tty(img):
     img = Image.open(io.BytesIO(img))
     qr = img.resize((47,47), Image.Resampling.NEAREST)

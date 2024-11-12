@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    body {
+      background-color: transparent;
+      margin: 0;
+      padding: 0;
+    }
+  </style>
+  <title>Tencent Captcha</title>
+  <script src="https://turing.captcha.qcloud.com/TCaptcha.js"></script>
+</head>
+
+<body>
+<p id='pywebview-status'><i>pywebview</i> is not ready</p>
+  <script type="text/javascript">
+
+     window.addEventListener('pywebviewready', function() {
+        var container = document.getElementById('pywebview-status')
+        container.innerHTML = '<i>pywebview</i> is ready'
+    })
+    function globalCallback(res) {
+      // 调用 Python 端的 post_message 方法
+             pywebview.api.post_message(JSON.stringify(res)); // 发送数据到 Python
+
+    }
+
+    // captcha js error callback
+    function errorCallback() {
+      globalCallback({
+        ret: -1,
+        randstr: '@' + Math.random().toString(36).substr(2),
+        ticket: '',
+        errorCode: 1001,
+        errorMessage: 'jsload_error',
+      });
+    }
+
+    window.onload = function () {
+      try {
+        const sdkOptions = {
+          needFeedBack: false,
+          enableDarkMode: false,
+          loading: false,
+          ready: function (size) {
+            console.log('ready size:', JSON.stringify(size));
+          }
+        };
+        const captcha = new TencentCaptcha('2091064951', globalCallback, sdkOptions);
+        // 调用方法，显示验证码
+        captcha.show();
+      } catch (error) {
+        errorCallback();
+      }
+    }
+
+  </script>
+
+</body>
+
+</html>

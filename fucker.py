@@ -32,6 +32,12 @@ import ast
 import hashlib
 import string
 import tiktoken
+from myWebView import myWebView
+
+import urllib3
+
+# 禁用 InsecureRequestWarning
+urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
 """
 ⠄⠄⠄⢰⣧⣼⣯⠄⣸⣠⣶⣶⣦⣾⠄⠄⠄⠄⡀⠄⢀⣿⣿⠄⠄⠄⢸⡇⠄⠄
@@ -163,7 +169,7 @@ class Fucker:
             "Referer": login_page
         })
         try:
-            self.session.get(login_page, proxies=self.proxies, timeout=10)
+            self.session.get(login_page, proxies=self.proxies, timeout=10,verify=False)
             form = {
                 "account": username,
                 "password": password
@@ -187,7 +193,7 @@ class Fucker:
                       "pwd": user_info.pwd,
                       "validate": 0
                     }
-            self.session.get(login_page, params=params, proxies=self.proxies, timeout=10)
+            self.session.get(login_page, params=params, proxies=self.proxies, timeout=10,verify=False)
             self.cookies = self.session.cookies.copy()
             if not self.cookies:
                 raise Exception("No cookies found")
@@ -197,6 +203,38 @@ class Fucker:
             logger.exception(e)
             raise Exception(f"Login failed: {e}")
 
+    def checkScanStatus(self,login_page,query_page,qrToken,scanned,viewMy):
+        while True:
+            time.sleep(0.5)
+            msg = ObjDict(
+                self.session.get(query_page, params={"qrToken": qrToken}, timeout=10,verify=False).json(),
+                default=None)
+            match msg.status:
+                case -1:
+                    pass  # not scanned
+                case 0:
+                    if not scanned:
+                        scanned = True
+                        logger.info(f"QR Scanned: {msg.msg}")
+                        print("QR Scanned")
+                case 1:
+                    logger.info(f"One-time code get: {msg.msg}")
+                    print("One-time code received")
+                    self.session.get(login_page, params={"pwd": msg.oncePassword}, proxies=self.proxies, timeout=10,verify=False)
+                    self.cookies = self.session.cookies.copy()
+                    if not self.cookies:
+                        raise Exception("No cookies found")
+                    logger.info("Login successful")
+                    break
+                case 2:
+                    print("QR code expired")
+                    raise TimeLimitExceeded(f"QR code expired: {msg.msg}")
+                case 3:
+                    raise Exception(f"Login canceled")
+                case _:
+                    raise Exception(f"Unknown Response {msg.msg}")
+        viewMy.close_curWin()
+
     def _qrlogin(self, qr_callback):
         """Login using qr code"""
         login_page = "https://passport.zhihuishu.com/login?service=https://onlineservice-api.zhihuishu.com/login/gologin"
@@ -204,7 +242,7 @@ class Fucker:
         query_page = "https://passport.zhihuishu.com/qrCodeLogin/getLoginQrInfo"
         self._sessionReady()
         try:
-            r = self.session.get(qr_page, timeout=10).json()
+            r = self.session.get(qr_page, timeout=10,verify=False).json()
             qrToken = r["qrToken"]
             img = b64decode(r["img"])
             if self.image_path != "": # 路径非空时保存图片到指定路径
@@ -215,35 +253,13 @@ class Fucker:
             qr_callback(img)
             logger.debug(f"QR login received, token{qrToken}")
             scanned = False
-            while True:
-                time.sleep(0.5)
-                msg = ObjDict(
-                    self.session.get(query_page, params={"qrToken":qrToken}, timeout=10).json(),
-                    default=None)
-                match msg.status:
-                    case -1:
-                        pass # not scanned
-                    case 0:
-                        if not scanned:
-                            scanned = True
-                            logger.info(f"QR Scanned: {msg.msg}")
-                            print("QR Scanned")
-                    case 1:
-                        logger.info(f"One-time code get: {msg.msg}")
-                        print("One-time code received")
-                        self.session.get(login_page, params={"pwd":msg.oncePassword}, proxies=self.proxies, timeout=10)
-                        self.cookies = self.session.cookies.copy()
-                        if not self.cookies:
-                            raise Exception("No cookies found")
-                        logger.info("Login successful")
-                        break
-                    case 2:
-                        print("QR code expired")
-                        raise TimeLimitExceeded(f"QR code expired: {msg.msg}")
-                    case 3:
-                        raise Exception(f"Login canceled")
-                    case _:
-                        raise Exception(f"Unknown Response {msg.msg}")
+
+            viewMy=myWebView()
+            checkThr=threading.Thread(target=self.checkScanStatus,args=(login_page,query_page,qrToken,scanned,viewMy))
+            checkThr.start()
+            viewMy.display_image(r["img"])
+            checkThr.join()
+
 
         except TimeLimitExceeded:
             self._qrlogin(qr_callback) # timeout? try again!
@@ -641,7 +657,7 @@ class Fucker:
         login_url = "https://studyservice-api.zhihuishu.com/login/gologin"
         params = {"fromurl": f"https://studyh5.zhihuishu.com/videoStudy.html#/studyVideo?recruitAndCourseId={RAC_id}"}
         logger.debug(f"GET {login_url}\nparams: {params}\n")
-        return self.session.get(login_url, params=params, proxies=self.proxies, timeout=10)
+        return self.session.get(login_url, params=params, proxies=self.proxies, timeout=10,verify=False)
 
     def queryCourse(self, RAC_id):
         '''### query course info for zhidao share course'''
@@ -1053,7 +1069,7 @@ class Fucker:
                                 "videoID": str(video_id),
                                 "_": int(time.time()*1000)
                             },
-                            cookies=cookies, headers=headers, proxies=self.proxies, timeout=10)
+                            cookies=cookies, headers=headers, proxies=self.proxies, timeout=10,verify=False)
             r = re.match(r"^result\((.*)\)$",r.text).group(1)
             url = ObjDict(json.loads(r)).result.lines[0].lineUrl
             try:
@@ -1080,14 +1096,14 @@ class Fucker:
                     if type(data) == dict:
                         data = json.dumps(data)
                 r = self.session.post(
-                    url, data=data, proxies=self.proxies, timeout=10)
+                    url, data=data, proxies=self.proxies, timeout=10,verify=False)
 
                 # set content-type back
                 self.session.headers.pop("Content-Type", None)
 
             case "GET":
                 r = self.session.get(
-                    url, params=data, proxies=self.proxies, timeout=10)
+                    url, params=data, proxies=self.proxies, timeout=10,verify=False)
             case _:
                 e = ValueError(f"Unsupport method: {method}")
                 logger.error(e)
