@@ -94,7 +94,7 @@ class myWebView:
         webview.start(self.read_cookies , windwow ,  private_mode=False)
 
     def post_captcha_validate(self, validate):
-        print("Received validate from JS:", validate)
+        # print("Received validate from JS:", validate)
         self.validate= validate
         self.close_curWin()
     def display_video_captcha(self):

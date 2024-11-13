@@ -480,10 +480,13 @@ class Fucker:
             for lesson in chapter.videoLessons:
                 tprint(prefix * 2)
                 tprint(f"{prefix * 2}__Fucking lesson {lesson.name}"[:w_lim])
-                for index, video in enumerate(lesson.videoSmallLessons):
+                video_list_size=len(lesson.videoSmallLessons)
+                video_index = 0
+                while video_index < video_list_size:
+                    video=lesson.videoSmallLessons[video_index]
                     tprint(f"{prefix * 3}__Fucking video {video.name}"[:w_lim])
                     try:
-                        self.fuckZhidaoVideo(RAC_id, lesson.videoSmallLessons[index].videoId)
+                        self.fuckZhidaoVideo(RAC_id, video.videoId)
                     except TimeLimitExceeded as e:
                         logger.info(f"Fucking time limit exceeded: {e}")
                         self._pushplus("fuckZHS", "刷课已完成")
@@ -501,15 +504,17 @@ class Fucker:
                         my_web_view = myWebView()
                         my_web_view.display_video_captcha()
                         res = self.postVideoCaptcha(course.recruitId, my_web_view.validate)
-                        tprint(f"{prefix}##Captcha res:{res}\a\n")
-                        index -= 1
-                        continue
+                        # tprint(f"{prefix}##Captcha res:{res}\a\n")
+                        video_index -=  1
+
+
 
                     except Exception as e:
                         logger.exception(e)
                         self._pushplus("fuckZHS", e)
                         self._bark("fuckZHS", e)
                         tprint(f"{prefix * 3}##Failed: {e}"[:w_lim])
+                    video_index += 1
 
         wipeLine()
         tprint(prefix)
@@ -692,12 +697,10 @@ class Fucker:
         encrypt_data=f'{data['areaCode']}{data['checkType']}{data['currentNo']}{data['osVersion']}{data['recruitId']}{data['token']}'
         cipher = Cipher('1bc538a18a207c9d'.encode(),'563216db1e1744c7'.encode())
         data['secretStr']=cipher.encrypt(encrypt_data)
-        return self.zhidaoQuery(vali_url,
-                                data=data,
-                                encrypt=False,
-                                ok_code=200,
-                                setTimeStamp=False
-                                )
+        ret = self._apiQuery(vali_url, data=data, method="POST",
+                             contentType="form")
+        return ret
+
     def videoList(self, RAC_id):
         '''### query video/chapter list for zhidao share course'''
         videos_url = "https://studyservice-api.zhihuishu.com/gateway/t/v1/learning/videolist"

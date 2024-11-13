@@ -95,7 +95,7 @@ def wipeLine():
     print('\r' + ' ' * (width), end = '\r', flush=True)
 
 def progressBar (iteration, total, prefix = '', suffix = '', decimals = 1,
-                      length = None, fill = '#', progressbar_view:bool = True):
+                      length = None, fill = "▓", progressbar_view:bool = True):
     """
     ### Call in a loop to create terminal progress bar
     * `iteration`   - Required  : current iteration (Int)
