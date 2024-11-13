@@ -31,7 +31,7 @@ import threading
 import ast
 import hashlib
 import string
-import tiktoken
+# import tiktoken
 from myWebView import myWebView
 
 import urllib3
@@ -454,7 +454,9 @@ class Fucker:
         ctx = self.getZhidaoContext(RAC_id)
         course = ctx.course
         chapters = ctx.chapters
-        
+
+
+
         # start fucking
         tprint(f"Fucking Zhidao course: {course.courseInfo.name or course.courseInfo.enName}")
         begin_time = time.time() # real world time
@@ -466,16 +468,17 @@ class Fucker:
             # 考虑直接移除此变量，但是保留原代码风格，故进行赋值
             w_lim = 80
         try:
+
             for chapter in chapters.videoChapterDtos:
                 tprint(prefix) # extra line as separator
                 tprint(f"{prefix}__Fucking chapter {chapter.name}"[:w_lim])
                 for lesson in chapter.videoLessons:
                     tprint(prefix*2)
                     tprint(f"{prefix*2}__Fucking lesson {lesson.name}"[:w_lim])
-                    for video in lesson.videoSmallLessons:
+                    for index,video in enumerate(lesson.videoSmallLessons):
                         tprint(f"{prefix*3}__Fucking video {video.name}"[:w_lim])
                         try:
-                            self.fuckZhidaoVideo(RAC_id, video.videoId)
+                            self.fuckZhidaoVideo(RAC_id, lesson.videoSmallLessons[index].videoId)
                         except TimeLimitExceeded as e:
                             logger.info(f"Fucking time limit exceeded: {e}")
                             self._pushplus("fuckZHS","刷课已完成")
@@ -489,7 +492,15 @@ class Fucker:
                             self._bark("fuckZHS","需要提供验证码")
                             tprint(prefix)
                             tprint(f"{prefix}##Captcha required\a\n")
-                            return
+
+                            my_web_view = myWebView()
+                            my_web_view.display_video_captcha()
+                            res = self.postVideoCaptcha(course.recruitId, my_web_view.validate)
+                            print(res)
+                            index -= 1
+                            continue
+
+
                         except Exception as e:
                             logger.exception(e)
                             self._pushplus("fuckZHS",e)
@@ -663,7 +674,27 @@ class Fucker:
         '''### query course info for zhidao share course'''
         course_url = "https://studyservice-api.zhihuishu.com/gateway/t/v1/learning/queryCourse"
         return self.zhidaoQuery(course_url, {"recruitAndCourseId": RAC_id}).data
-
+    def postVideoCaptcha(self, recruitId,validate):
+        '''### '''
+        vali_url = "https://appstudent-api.zhihuishu.com/appstudent/gateway/t/v1/student/tutorialV2/validateSlideToken"
+        data = {
+            'areaCode': 86,
+            'checkType': 1,
+            'currentNo': 0,
+            'osVersion': 2,
+            'recruitId': recruitId,
+            'secretStr': '',
+            'token': validate,
+        }
+        encrypt_data=f'{data['areaCode']}{data['checkType']}{data['currentNo']}{data['osVersion']}{data['recruitId']}{data['token']}'
+        cipher = Cipher('1bc538a18a207c9d'.encode(),'563216db1e1744c7'.encode())
+        data['secretStr']=cipher.encrypt(encrypt_data)
+        return self.zhidaoQuery(vali_url,
+                                data=data,
+                                encrypt=False,
+                                ok_code=200,
+                                setTimeStamp=False
+                                )
     def videoList(self, RAC_id):
         '''### query video/chapter list for zhidao share course'''
         videos_url = "https://studyservice-api.zhihuishu.com/gateway/t/v1/learning/videolist"
@@ -1963,7 +1994,7 @@ class Openai:
         self.session = zhiDaosession if zhiDaosession is not None else requests.Session()
         self.useZhidao = useZhidao
 
-        self.encoder = tiktoken.encoding_for_model("gpt-4")
+        # self.encoder = tiktoken.encoding_for_model("gpt-4")
 
         self.prefix = "8ZflKEagfL"
 

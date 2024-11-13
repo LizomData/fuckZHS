@@ -3,64 +3,50 @@
 
 <head>
   <meta charset="UTF-8">
-  <meta http-equiv="X-UA-Compatible" content="IE=edge">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <style>
-    body {
-      background-color: transparent;
-      margin: 0;
-      padding: 0;
-    }
-  </style>
-  <title>Tencent Captcha</title>
-  <script src="https://turing.captcha.qcloud.com/TCaptcha.js"></script>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>网易易盾验证码-closeEnable</title>
+  <script src="https://cstaticdun.126.net/load.min.js"></script>
 </head>
 
 <body>
-<p id='pywebview-status'><i>pywebview</i> is not ready</p>
-  <script type="text/javascript">
+  <div id="captcha"></div>
 
-     window.addEventListener('pywebviewready', function() {
-        var container = document.getElementById('pywebview-status')
-        container.innerHTML = '<i>pywebview</i> is ready'
-    })
-    function globalCallback(res) {
-      // 调用 Python 端的 post_message 方法
-             pywebview.api.post_message(JSON.stringify(res)); // 发送数据到 Python
+  <script>
 
-    }
-
-    // captcha js error callback
-    function errorCallback() {
-      globalCallback({
-        ret: -1,
-        randstr: '@' + Math.random().toString(36).substr(2),
-        ticket: '',
-        errorCode: 1001,
-        errorMessage: 'jsload_error',
-      });
-    }
-
-    window.onload = function () {
-      try {
-        const sdkOptions = {
-          needFeedBack: false,
-          enableDarkMode: false,
-          loading: false,
-          ready: function (size) {
-            console.log('ready size:', JSON.stringify(size));
-          }
-        };
-        const captcha = new TencentCaptcha('2091064951', globalCallback, sdkOptions);
-        // 调用方法，显示验证码
-        captcha.show();
-      } catch (error) {
-        errorCallback();
+    var captchaIns;
+    initNECaptcha({
+      element: '#captcha',
+      captchaId: '4da3050565514a35a50541b0e1f54538',
+      mode: 'popup',
+      width: '320px',
+      closeEnable: true,
+      apiVersion: 2,
+      popupStyles: {
+        position: 'fixed',
+        top: '20%'
+      },
+      onClose: function () {
+        // 弹出关闭结束后将会触发该函数
+      },
+      onVerify: function (err, data) {
+        if (!err) {
+          // 验证成功后，调用 close 方法关闭弹框
+          captchaIns.close()
+          // TODO: 验证成功后继续进行业务逻辑
+          console.log(data)
+          pywebview.api.post_captcha_validate(data.validate)
+        }
       }
-    }
-
+    }, function (instance) {
+      // 初始化成功后得到验证实例 instance，可以调用实例的方法
+      captchaIns = instance
+      captchaIns.verify()
+    }, function (err) {
+      // 初始化失败后触发该函数，err 对象描述当前错误信息
+    })
+ 
   </script>
-
 </body>
 
 </html>

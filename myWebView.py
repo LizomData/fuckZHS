@@ -3,28 +3,15 @@ import time
 import requests
 import webview
 import json
-from http.cookies import SimpleCookie
 
-
-class JSBridge:
-
-    def post_message(self, message):
-        print("Received message from JS:", message)
-
-
-    def send_data(self, data):
-        # 发送数据给 JS
-        print("Sending data to JS:", data)
 
 class myWebView:
-    def __init__(self):
-        self.curWin=None
-
 
 
     def close_curWin(self):
-        if self.curWin is not None:
-            self.curWin.destroy()
+        for win in webview.windows:
+            win.destroy()
+
 
     def display_image(self,img_base64):
         img_base64 =img_base64
@@ -48,7 +35,7 @@ class myWebView:
                </html>
                """
 
-        self.curWin=webview.create_window("Image Viewer", html=html_content, width=600, height=600)
+        webview.create_window("Image Viewer", html=html_content, width=600, height=600)
         webview.start()
 
 
@@ -103,12 +90,20 @@ class myWebView:
         self.close_curWin()
 
     def display_html_url(self,url):
-        self.curWin=webview.create_window("Web Viewer", url=url)
-        webview.start(self.read_cookies , self.curWin ,  private_mode=False)
+        windwow = webview.create_window("Web Viewer", url=url)
+        webview.start(self.read_cookies , windwow ,  private_mode=False)
 
+    def post_captcha_validate(self, validate):
+        print("Received validate from JS:", validate)
+        self.validate= validate
+        self.close_curWin()
+    def display_video_captcha(self):
+        webview.create_window('Captcha',  url='captcha.html',js_api=self)
+        webview.start()
 
 
 if __name__ == "__main__":
 
     web_view=myWebView()
+    web_view.display_video_captcha()
     web_view.display_html_url('https://passport.zhihuishu.com/login?service=https://onlineservice-api.zhihuishu.com/gateway/f/v1/login/gologin')
