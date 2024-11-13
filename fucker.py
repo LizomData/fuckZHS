@@ -467,47 +467,50 @@ class Fucker:
         except Exception as e:
             # 考虑直接移除此变量，但是保留原代码风格，故进行赋值
             w_lim = 80
-        try:
 
-            for chapter in chapters.videoChapterDtos:
-                tprint(prefix) # extra line as separator
-                tprint(f"{prefix}__Fucking chapter {chapter.name}"[:w_lim])
-                for lesson in chapter.videoLessons:
-                    tprint(prefix*2)
-                    tprint(f"{prefix*2}__Fucking lesson {lesson.name}"[:w_lim])
-                    for index,video in enumerate(lesson.videoSmallLessons):
-                        tprint(f"{prefix*3}__Fucking video {video.name}"[:w_lim])
-                        try:
-                            self.fuckZhidaoVideo(RAC_id, lesson.videoSmallLessons[index].videoId)
-                        except TimeLimitExceeded as e:
-                            logger.info(f"Fucking time limit exceeded: {e}")
-                            self._pushplus("fuckZHS","刷课已完成")
-                            self._bark("fuckZHS","刷课已完成")
-                            tprint(prefix)
-                            tprint(f"{prefix}##Fucking time limit exceeded: {e}\n")
-                            return
-                        except CaptchaException:
-                            logger.info("Captcha required")
-                            self._pushplus("fuckZHS","需要提供验证码")
-                            self._bark("fuckZHS","需要提供验证码")
-                            tprint(prefix)
-                            tprint(f"{prefix}##Captcha required\a\n")
+        # try:
+        #     print('sdf')
+        # except KeyboardInterrupt:
+        #     logger.info("User interrupted")
+        #     tprint(f"{prefix}## 执行已被用户停止。")
 
-                            my_web_view = myWebView()
-                            my_web_view.display_video_captcha()
-                            res = self.postVideoCaptcha(course.recruitId, my_web_view.validate)
-                            print(res)
-                            index -= 1
-                            continue
+        for chapter in chapters.videoChapterDtos:
+            tprint(prefix)  # extra line as separator
+            tprint(f"{prefix}__Fucking chapter {chapter.name}"[:w_lim])
+            for lesson in chapter.videoLessons:
+                tprint(prefix * 2)
+                tprint(f"{prefix * 2}__Fucking lesson {lesson.name}"[:w_lim])
+                for index, video in enumerate(lesson.videoSmallLessons):
+                    tprint(f"{prefix * 3}__Fucking video {video.name}"[:w_lim])
+                    try:
+                        self.fuckZhidaoVideo(RAC_id, lesson.videoSmallLessons[index].videoId)
+                    except TimeLimitExceeded as e:
+                        logger.info(f"Fucking time limit exceeded: {e}")
+                        self._pushplus("fuckZHS", "刷课已完成")
+                        self._bark("fuckZHS", "刷课已完成")
+                        tprint(prefix)
+                        tprint(f"{prefix}##Fucking time limit exceeded: {e}\n")
+                        return
+                    except CaptchaException:
+                        logger.info("Captcha required")
+                        self._pushplus("fuckZHS", "需要提供验证码")
+                        self._bark("fuckZHS", "需要提供验证码")
+                        tprint(prefix)
+                        tprint(f"{prefix}##Captcha required\a\n")
 
+                        my_web_view = myWebView()
+                        my_web_view.display_video_captcha()
+                        res = self.postVideoCaptcha(course.recruitId, my_web_view.validate)
+                        tprint(f"{prefix}##Captcha res:{res}\a\n")
+                        index -= 1
+                        continue
 
-                        except Exception as e:
-                            logger.exception(e)
-                            self._pushplus("fuckZHS",e)
-                            self._bark("fuckZHS",e)
-                            tprint(f"{prefix*3}##Failed: {e}"[:w_lim])
-        except KeyboardInterrupt:
-            logger.info("User interrupted")
+                    except Exception as e:
+                        logger.exception(e)
+                        self._pushplus("fuckZHS", e)
+                        self._bark("fuckZHS", e)
+                        tprint(f"{prefix * 3}##Failed: {e}"[:w_lim])
+
         wipeLine()
         tprint(prefix)
         tprint(f"\r{prefix}__Fucked course {course.courseInfo.name}, cost {time.time()-begin_time:.2f}s\n")
