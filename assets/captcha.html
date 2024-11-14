@@ -107,31 +107,7 @@
 
 
 
-    // 创建一个按钮，用来触发模拟点击操作
-    var button = document.createElement('button');
-    button.innerHTML = '模拟点击指定元素'; // 按钮文本
-    button.style.position = 'fixed'; // 按钮固定在页面上
-    button.style.bottom = '20px';
-    button.style.right = '20px';
-    button.style.padding = '10px 20px';
-    button.style.fontSize = '16px';
-    button.style.backgroundColor = '#007bff';
-    button.style.color = 'white';
-    button.style.border = 'none';
-    button.style.borderRadius = '5px';
-    button.style.cursor = 'pointer';
-    button.style.zIndex = 9999; // 确保按钮位于页面最上层
 
-    // 添加按钮到页面
-    document.body.appendChild(button);
-
-
-
-    // 按钮点击事件
-    button.addEventListener('click', function () {
-      verify_captcha()
-
-    });
   </script>
 </body>
 
