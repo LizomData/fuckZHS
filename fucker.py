@@ -104,6 +104,7 @@ class Fucker:
                       raise_on_status=True,
                       status_forcelist=[500, 502, 503, 504])
         self.session = requests.Session()
+        self.session.verify = False
         self.session.mount('http://', HTTPAdapter(max_retries=retry))
         self.session.mount('https://', HTTPAdapter(max_retries=retry))
 
@@ -169,7 +170,7 @@ class Fucker:
             "Referer": login_page
         })
         try:
-            self.session.get(login_page, proxies=self.proxies, timeout=10,verify=False)
+            self.session.get(login_page, proxies=self.proxies, timeout=10)
             form = {
                 "account": username,
                 "password": password
@@ -193,7 +194,7 @@ class Fucker:
                       "pwd": user_info.pwd,
                       "validate": 0
                     }
-            self.session.get(login_page, params=params, proxies=self.proxies, timeout=10,verify=False)
+            self.session.get(login_page, params=params, proxies=self.proxies, timeout=10)
             self.cookies = self.session.cookies.copy()
             if not self.cookies:
                 raise Exception("No cookies found")
@@ -207,7 +208,7 @@ class Fucker:
         while True:
             time.sleep(0.5)
             msg = ObjDict(
-                self.session.get(query_page, params={"qrToken": qrToken}, timeout=10,verify=False).json(),
+                self.session.get(query_page, params={"qrToken": qrToken}, timeout=10).json(),
                 default=None)
             match msg.status:
                 case -1:
@@ -220,7 +221,7 @@ class Fucker:
                 case 1:
                     logger.info(f"One-time code get: {msg.msg}")
                     print("One-time code received")
-                    self.session.get(login_page, params={"pwd": msg.oncePassword}, proxies=self.proxies, timeout=10,verify=False)
+                    self.session.get(login_page, params={"pwd": msg.oncePassword}, proxies=self.proxies, timeout=10)
                     self.cookies = self.session.cookies.copy()
                     if not self.cookies:
                         raise Exception("No cookies found")
@@ -242,7 +243,7 @@ class Fucker:
         query_page = "https://passport.zhihuishu.com/qrCodeLogin/getLoginQrInfo"
         self._sessionReady()
         try:
-            r = self.session.get(qr_page, timeout=10,verify=False).json()
+            r = self.session.get(qr_page, timeout=10).json()
             qrToken = r["qrToken"]
             img = b64decode(r["img"])
             if self.image_path != "": # 路径非空时保存图片到指定路径
@@ -482,11 +483,14 @@ class Fucker:
                 tprint(f"{prefix * 2}__Fucking lesson {lesson.name}"[:w_lim])
                 video_list_size=len(lesson.videoSmallLessons)
                 video_index = 0
+                retry_count = 0
+                retry_count_max = 3
                 while video_index < video_list_size:
                     video=lesson.videoSmallLessons[video_index]
                     tprint(f"{prefix * 3}__Fucking video {video.name}"[:w_lim])
                     try:
                         self.fuckZhidaoVideo(RAC_id, video.videoId)
+                        retry_count = 0
                     except TimeLimitExceeded as e:
                         logger.info(f"Fucking time limit exceeded: {e}")
                         self._pushplus("fuckZHS", "刷课已完成")
@@ -514,6 +518,16 @@ class Fucker:
                         self._pushplus("fuckZHS", e)
                         self._bark("fuckZHS", e)
                         tprint(f"{prefix * 3}##Failed: {e}"[:w_lim])
+
+                        retry_count += 1
+                        if retry_count <= retry_count_max:
+                            video_index -= 1
+                            tprint(f"{prefix * 3}##正在尝试重新播放视频：{retry_count}/{retry_count_max}")
+                            time.sleep(10)
+                        else:
+                            tprint(f"{prefix * 3}##尝试重新播放视频失败：超过尝试次数 {retry_count_max} 次")
+
+
                     video_index += 1
 
         wipeLine()
@@ -676,7 +690,7 @@ class Fucker:
         login_url = "https://studyservice-api.zhihuishu.com/login/gologin"
         params = {"fromurl": f"https://studyh5.zhihuishu.com/videoStudy.html#/studyVideo?recruitAndCourseId={RAC_id}"}
         logger.debug(f"GET {login_url}\nparams: {params}\n")
-        return self.session.get(login_url, params=params, proxies=self.proxies, timeout=10,verify=False)
+        return self.session.get(login_url, params=params, proxies=self.proxies, timeout=10)
 
     def queryCourse(self, RAC_id):
         '''### query course info for zhidao share course'''
@@ -1133,14 +1147,14 @@ class Fucker:
                     if type(data) == dict:
                         data = json.dumps(data)
                 r = self.session.post(
-                    url, data=data, proxies=self.proxies, timeout=10,verify=False)
+                    url, data=data, proxies=self.proxies, timeout=10)
 
                 # set content-type back
                 self.session.headers.pop("Content-Type", None)
 
             case "GET":
                 r = self.session.get(
-                    url, params=data, proxies=self.proxies, timeout=10,verify=False)
+                    url, params=data, proxies=self.proxies, timeout=10)
             case _:
                 e = ValueError(f"Unsupport method: {method}")
                 logger.error(e)

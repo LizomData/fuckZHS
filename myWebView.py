@@ -99,13 +99,10 @@ class myWebView:
     def verify_captcha(self,imgUrl, extra):
         b = base64.b64encode(requests.get(url=imgUrl, verify=False).content).decode()  ## 图片二进制流base64字符串
 
-        with open('YmServerConfig.json','r',encoding='UTF-8') as f:
-            config=json.loads(f.read())
 
         url = "http://api.jfbym.com/api/YmServer/customApi"
         data = {
-            ## 关于参数,一般来说有3个;不同类型id可能有不同的参数个数和参数名,找客服获取
-            "token": f"{config['token']}",
+            "token": r"your token",
             "type": "30109",
             "image": b,
             'extra': extra,
@@ -121,22 +118,20 @@ class myWebView:
                 # print(response.text)
                 return {'x': pos[0], 'y': pos[1]}
             case "10007":   #图片未识别成功
-                return {'x': 50, 'y': 50}
-
-
-
+                return {'x': 0, 'y': 0}
+            case default:
+                return {'x': 0, 'y': 0}
 
     def post_captcha_validate(self, validate):
         # print("Received validate from JS:", validate)
         self.validate= validate
         self.close_curWin()
     def display_video_captcha(self):
-        webview.create_window('Captcha',  url='captcha.html',js_api=self)
+        webview.create_window('Captcha',  url='assets/captcha.html',js_api=self)
         webview.start()
 
 
 if __name__ == "__main__":
-
     web_view=myWebView()
     web_view.display_video_captcha()
     # web_view.display_html_url('https://passport.zhihuishu.com/login?service=https://onlineservice-api.zhihuishu.com/gateway/f/v1/login/gologin')
