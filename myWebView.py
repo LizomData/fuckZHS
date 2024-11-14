@@ -1,8 +1,10 @@
+import base64
+import re
 import time
-
 import requests
 import webview
 import json
+
 
 
 class myWebView:
@@ -93,6 +95,27 @@ class myWebView:
         windwow = webview.create_window("Web Viewer", url=url)
         webview.start(self.read_cookies , windwow ,  private_mode=False)
 
+    def verify_captcha(self,imgUrl, extra):
+        b = base64.b64encode(requests.get(url=imgUrl, verify=False).content).decode()  ## 图片二进制流base64字符串
+
+        url = "http://api.jfbym.com/api/YmServer/customApi"
+        data = {
+            ## 关于参数,一般来说有3个;不同类型id可能有不同的参数个数和参数名,找客服获取
+            "token": r"",
+            "type": "30109",
+            "image": b,
+            'extra': extra,
+        }
+        _headers = {
+            "Content-Type": "application/json"
+        }
+        response = requests.request("POST", url, headers=_headers, json=data, verify=False)
+        response_json = json.loads(response.text)
+        pos=re.split(',',response_json['data']['data'])
+
+        # print(response.text)
+        return {'x':pos[0],'y':pos[1]}
+
     def post_captcha_validate(self, validate):
         # print("Received validate from JS:", validate)
         self.validate= validate
@@ -106,4 +129,4 @@ if __name__ == "__main__":
 
     web_view=myWebView()
     web_view.display_video_captcha()
-    web_view.display_html_url('https://passport.zhihuishu.com/login?service=https://onlineservice-api.zhihuishu.com/gateway/f/v1/login/gologin')
+    # web_view.display_html_url('https://passport.zhihuishu.com/login?service=https://onlineservice-api.zhihuishu.com/gateway/f/v1/login/gologin')

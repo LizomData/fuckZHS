@@ -11,9 +11,62 @@
 
 <body>
   <div id="captcha"></div>
-
   <script>
+    function clickCaptcha(pos) {
+      // alert(pos['x']+","+pos['y'])
+      var targetElement = document.querySelector('.yidun_bgimg');
 
+      // 检查元素是否存在
+      if (targetElement) {
+
+        // var x =70;  // 元素中间的 x 坐标
+        // var y = 73;  // 元素中间的 y 坐标
+
+        var rect = targetElement.getBoundingClientRect();
+        var x = rect.left + ~~pos['x']; // 元素中间的 x 坐标
+        var y = rect.top + ~~pos['y']; // 元素中间的 y 坐标
+
+        // 创建鼠标点击事件
+        var event = new MouseEvent('click', {
+          clientX: x, // 鼠标点击的 x 坐标
+          clientY: y, // 鼠标点击的 y 坐标
+          bubbles: true, // 事件冒泡
+          cancelable: true // 事件可取消
+        });
+
+        // 触发事件
+        targetElement.dispatchEvent(event);
+        console.log(`已模拟点击元素: .yidun_bgimg, 坐标: (${x}, ${y})`);
+      } else {
+        console.log('未找到元素 .yidun_bgimg');
+      }
+    }
+
+
+
+    function verify_captcha() {
+      var imgUrl=""
+      var extra=""
+
+      var imgElement = document.querySelector('.yidun_bg-img');
+      if (imgElement) {
+        imgUrl = imgElement.src;
+        console.log('验证码图片的 URL: ', imgUrl);
+      } else {
+        console.log('未找到对应的图片元素');
+      }
+
+      var extElement = document.querySelector('.yidun-fallback__tip');
+      if (extElement) {
+        extra = extElement.innerHTML;
+        console.log('验证码描述的 ext: ', extra);
+      } else {
+        console.log('未找到对应的描述元素');
+      }
+
+      pywebview.api.verify_captcha(imgUrl,extra).then(clickCaptcha)
+  
+    }
     var captchaIns;
     initNECaptcha({
       element: '#captcha',
@@ -24,7 +77,8 @@
       apiVersion: 2,
       popupStyles: {
         position: 'fixed',
-        top: '20%'
+        top: '20%',
+
       },
       onClose: function () {
         // 弹出关闭结束后将会触发该函数
@@ -37,15 +91,47 @@
           console.log(data)
           pywebview.api.post_captcha_validate(data.validate)
         }
+      },
+      onReady: function (ins) {
+        verify_captcha()
+        
       }
     }, function (instance) {
       // 初始化成功后得到验证实例 instance，可以调用实例的方法
       captchaIns = instance
       captchaIns.verify()
+
     }, function (err) {
       // 初始化失败后触发该函数，err 对象描述当前错误信息
     })
- 
+
+
+
+    // 创建一个按钮，用来触发模拟点击操作
+    var button = document.createElement('button');
+    button.innerHTML = '模拟点击指定元素'; // 按钮文本
+    button.style.position = 'fixed'; // 按钮固定在页面上
+    button.style.bottom = '20px';
+    button.style.right = '20px';
+    button.style.padding = '10px 20px';
+    button.style.fontSize = '16px';
+    button.style.backgroundColor = '#007bff';
+    button.style.color = 'white';
+    button.style.border = 'none';
+    button.style.borderRadius = '5px';
+    button.style.cursor = 'pointer';
+    button.style.zIndex = 9999; // 确保按钮位于页面最上层
+
+    // 添加按钮到页面
+    document.body.appendChild(button);
+
+
+
+    // 按钮点击事件
+    button.addEventListener('click', function () {
+      verify_captcha()
+
+    });
   </script>
 </body>
 
