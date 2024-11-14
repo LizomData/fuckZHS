@@ -2,6 +2,7 @@
 **/logs
 config.json
 cookies.json
+YmServerConfig.json
 execution.json
 *.js
 .DS_Store

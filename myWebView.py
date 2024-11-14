@@ -115,7 +115,7 @@ class myWebView:
         }
         response = requests.request("POST", url, headers=_headers, json=data, verify=False)
         response_json = json.loads(response.text)
-        match(response_json['code']):
+        match str(response_json['code']):
             case "10000":
                 pos = re.split(',', response_json['data']['data'])
                 # print(response.text)
