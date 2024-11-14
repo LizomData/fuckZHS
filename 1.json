@@ -3,5 +3,27 @@
     "ev": "484c424d455b5f4b4a404544535d4c43464f4451564948464c455a57414b4044455a564f4c4147",
     "checkType": 1
 }
+
+"""
+{
+  "msg": "图片未识别成功，请换图重试或联系客服咨询其他识别接口！",
+  "code": 10007,
+  "data": []
+}
+"""
+
+"""
+{
+  "msg": "识别成功",
+  "code": 10000,
+  "data": {
+    "code": 0,
+    "data": "119,113",
+    "time": 0.07481622695922852,
+    "unique_code": "039dd03a595f0c305b19560f34faad9d",
+    "file_path": "https://obs.jfbym.com/jfb_upload/YmServer/2024/11-14/37499/f8b576caa4a3b491e621d1c06ee2f2a4.jpeg"
+  }
+}
+"""
 {"token":"CN31_BLIk5QFikeFD8lxvtET3StBMPT.QcOM*TIhdxVZDia5fJHCihjhutz.lwdAFk014uhQwNm8Ttt8D9rjckA0QTjfdEloa_Ai.kZKppqfidh6dAwX_qSg1MOPTuzw2C*YZiBxIim3XwuGMdNa3*R499hLZ33iCAQ4N53EzYgdgGbtKLD2LHoeBPz_lO5mjoohBtA9TwkjekL3y.ooNftb2c8ARI8BWmoWgPtU2wX8r1f3*zPqtVWcyj*6RC0BqZwdNHNqxsbqfAcg4DWSSCt2dP2DAexVlglOesrCwr2roXbk0KRZVGrcI*jK39CqnL5HtP5CFVlV24Kv*5AkgUIahSG3E6vGo8S8QVhWthVVCtMF*WJCR_RHh*FQtk_6EXT4bY1Whmtmahv61W3QjCkkgg4o4dJJCWPKZYqzX1*ZIp5WE8lqEVtNNYwjW.qQuuEP.bAyy8DGHnIbWEUj*5Fy06NET6FngJDeS_DHgHsiqGrbB*8vY1JwJODgyfa4nDu5xui2DFY77_v_i_1","ev":"484c424d455b5f4b4a404544535d4d4b424f44515649484841405e53414b4044455a564f4c4140","checkType":1}
 "CN31_ldrVjc*qhv0uR2BB_naYCI1Rbz5R4MgRn0AigwdRGwoSigOpsvKRxVaKjS.4N09a36MAdLVXQSWi20YcVcgR9yC4GculOMzjwWSPyzyI3xv3xvgp.q2LFlvuB.e4Jy6tCiaE83Eu5Me_5FCf.TSDVc5_HT6QOQNBVdc_5*VrvvTT*mzJORLiuJGIezZI*b2gHLXeSYQlIxtcZD*2e8FuVJE1lsqJ1dzEff.kGGIcSqIa98_OzZ0KI4wRUTxTz6hi.H2KgHYj2AU66Zv4gki14E50IsUieiBcO.bShd3P3KPg_.VPoHw9FIrTovRa_KdOkq.vZ9Lm9Mp6_NNOWUTPgOrij9T0YoKkGWJFyybiN9aPjFV8Rdk9J*KTydlc1m*NGxe*Azwu0SKIXfHSWIEKFTad0pqCM6_h0JDphLFCa18lIhqBz*KYw1AJpRdctb*BUhrSgQkHCmoZc5dzwaGRk.alahpodXgJRI4N5FWgNjOIZiiwGp_pawFEg91Ra*Zg2kX12M77_v_i_1"

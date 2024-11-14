@@ -95,6 +95,7 @@ class myWebView:
         windwow = webview.create_window("Web Viewer", url=url)
         webview.start(self.read_cookies , windwow ,  private_mode=False)
 
+
     def verify_captcha(self,imgUrl, extra):
         b = base64.b64encode(requests.get(url=imgUrl, verify=False).content).decode()  ## 图片二进制流base64字符串
 
@@ -114,10 +115,16 @@ class myWebView:
         }
         response = requests.request("POST", url, headers=_headers, json=data, verify=False)
         response_json = json.loads(response.text)
-        pos=re.split(',',response_json['data']['data'])
+        match(response_json['code']):
+            case "10000":
+                pos = re.split(',', response_json['data']['data'])
+                # print(response.text)
+                return {'x': pos[0], 'y': pos[1]}
+            case "10007":   #图片未识别成功
+                return {'x': 50, 'y': 50}
 
-        # print(response.text)
-        return {'x':pos[0],'y':pos[1]}
+
+
 
     def post_captcha_validate(self, validate):
         # print("Received validate from JS:", validate)
