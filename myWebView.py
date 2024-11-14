@@ -98,10 +98,13 @@ class myWebView:
     def verify_captcha(self,imgUrl, extra):
         b = base64.b64encode(requests.get(url=imgUrl, verify=False).content).decode()  ## 图片二进制流base64字符串
 
+        with open('YmServerConfig.json','r',encoding='UTF-8') as f:
+            config=json.loads(f.read())
+
         url = "http://api.jfbym.com/api/YmServer/customApi"
         data = {
             ## 关于参数,一般来说有3个;不同类型id可能有不同的参数个数和参数名,找客服获取
-            "token": r"",
+            "token": f"{config['token']}",
             "type": "30109",
             "image": b,
             'extra': extra,
